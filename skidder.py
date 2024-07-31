@@ -59,6 +59,8 @@ class SkidderNet():
         self.__IncomingReqEvent = None
         self.__SuccessLoginEvent = None
         self.__FailedLoginEvent = None
+        self.__InputEvent = None
+        self.__DisconnectEvent = None
         print(f"[ + ] Socket server has started....!")
 
     """
@@ -77,29 +79,39 @@ class SkidderNet():
             self.__IncomingReqEvent(client)
 
         client.send("Username: ".encode())
-        user        = client.recv(BUFF_SZ).decode().strip()
+        user        = client.recv(BUFF_SZ).decode().strip().replace("\r", "").replace("\n", "")
         client.send("Password: ".encode())
-        passwd      = client.recv(BUFF_SZ).decode().strip()
+        passwd      = client.recv(BUFF_SZ).decode().strip().replace("\r", "").replace("\n", "")
+        if passwd == "":
+            passwd      = client.recv(BUFF_SZ).decode().strip().replace("\r", "").replace("\n", "")
 
         get_info = self.findUser(user)
         if get_info.name == user and get_info.passwd == passwd:
             if self.__SuccessLoginEvent:
                 self.__SuccessLoginEvent(client, get_info)
+            
+            print("HERE 1")
+            self.HandleCLI(client, get_info)
+            print("HERE 2")
         else:
             if self.__FailedLoginEvent:
                 self.__FailedLoginEvent(client)
 
-        self.HandleCLI(client)
-
-    def HandleCLI(self, client) -> None:
+    def HandleCLI(self, client, user) -> None:
+        print("HERE 3")
         global PS1
         while True:
+            client.send(PS1.encode())
             data = client.recv(BUFF_SZ).decode().strip().replace("\r", "").replace("\n", "")
 
-            if not data or not data == "\r\n" or not len(data) > 3:
+            if not data or len(data) < 3:
                 continue
 
-            if data == "test":
+
+            if self.__InputEvent:
+                self.__InputEvent(client, user, data)
+
+            elif data == "test":
                 client.send("Working\r\n".encode())
             
             client.send(PS1.encode())
@@ -116,6 +128,10 @@ class SkidderNet():
         self.__SuccessLoginEvent = success_login;
         self.__FailedLoginEvent = failed_login;
         print("[ SKIDDER ] SuccessLoginEvent and FailedLoginEvent Linked")
+
+    def LoadInputEvent(self, handler) -> None:
+        self.__InputEvent = handler
+        print("[ SKIDDER ] InputEvent Linked")
 
     """
         Crud && User Utils

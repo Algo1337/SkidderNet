@@ -22,8 +22,10 @@ def on_connection_disconnect(client):
     pass
 
 # Grab all inputs from socket (Including commands)
-def on_input(client, user):
-    pass
+def on_input(client, user, data):
+    print(f"New Input {user.name} {data}")
+
+    # You can create your own command handler here
 
 try:
     # Start SkidderNet
@@ -34,7 +36,7 @@ try:
     net.LoadLoginEvent(on_success_login, on_failed_login)
 
     # net.LoadDisconnectEventHandler(on_connection_disconnect) # (UNFINISHED)
-    # net.LoadInputEvent(on_input) # Optional (UNFINISHED)
+    net.LoadInputEvent(on_input) # Optional
 
 
     # Listen for connections
