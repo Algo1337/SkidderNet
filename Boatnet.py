@@ -1,6 +1,11 @@
 """
     [ A C2/CNC Designed To Work Like a Discord Bot with Events :) ]
 
+    Features:
+        Built-In Event Handling
+        Built-In DB CRUD Management (Needs work)
+        Built-In Command Handler
+
     Socket Protection can be added to 'on_incoming_connection(client)'
 """
 from skidder import *
@@ -34,15 +39,13 @@ try:
     # Link Your Own Handlers
     net.LoadIncomingReqEvent(on_incoming_connection)
     net.LoadLoginEvent(on_success_login, on_failed_login)
-
     # net.LoadDisconnectEventHandler(on_connection_disconnect) # (UNFINISHED)
 
-    """ 
+    """
         By Using The Input Handler, You are disabling Skidder's 
         Built-in Command Handler 
     """
     # net.LoadInputEvent(on_input) # Optional
-
 
     # Listen for connections
     net.ConnectionListener()
