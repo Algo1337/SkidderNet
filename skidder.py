@@ -86,35 +86,39 @@ class SkidderNet():
             passwd      = client.recv(BUFF_SZ).decode().strip().replace("\r", "").replace("\n", "")
 
         get_info = self.findUser(user)
-        if get_info.name == user and get_info.passwd == passwd:
+        if get_info and get_info.name == user and get_info.passwd == passwd:
             if self.__SuccessLoginEvent:
                 self.__SuccessLoginEvent(client, get_info)
             
-            print("HERE 1")
             self.HandleCLI(client, get_info)
-            print("HERE 2")
         else:
             if self.__FailedLoginEvent:
                 self.__FailedLoginEvent(client)
 
     def HandleCLI(self, client, user) -> None:
-        print("HERE 3")
         global PS1
         while True:
-            client.send(PS1.encode())
-            data = client.recv(BUFF_SZ).decode().strip().replace("\r", "").replace("\n", "")
+            resp = client.recv(BUFF_SZ)
+            data = resp.decode().strip().replace("\r", "").replace("\n", "")
 
-            if not data or len(data) < 3:
+            if data == "":
+                client.send(f"\r{PS1}".encode())
                 continue
 
+            if len(data.strip()) > 2:
+                if self.__InputEvent:
+                    self.__InputEvent(client, user, data)
+                    continue;
 
-            if self.__InputEvent:
-                self.__InputEvent(client, user, data)
-
-            elif data == "test":
-                client.send("Working\r\n".encode())
+                elif data == "test":
+                    client.send("Working\r\n".encode())
+                else:
+                    client.send("[ x ] Error, Invalid command!\r\n".encode())
             
-            client.send(PS1.encode())
+            if resp != "\r\n".encode():
+                client.send(PS1.encode())
+
+            print(f"[ SKIDDER ] Input from {user.name}: {data}")
 
     """
         Event Method Linking

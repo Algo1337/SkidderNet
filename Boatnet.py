@@ -11,11 +11,11 @@ def on_incoming_connection(client):
 
 # Handle Successful Login
 def on_success_login(client, user: User):
-    client.send(f"Successfully logged in nigga...! {user.name}".encode())
+    client.send(f"Successfully logged in nigga...! {user.name}\r\n".encode())
 
 # Handle Failed Login Attempts
 def on_failed_login(client):
-    client.send(f"Failed to login nigga...!".encode())
+    client.send(f"Failed to login nigga...!\r\n".encode())
 
 # Handle Connection Disconnects
 def on_connection_disconnect(client):
@@ -36,7 +36,12 @@ try:
     net.LoadLoginEvent(on_success_login, on_failed_login)
 
     # net.LoadDisconnectEventHandler(on_connection_disconnect) # (UNFINISHED)
-    net.LoadInputEvent(on_input) # Optional
+
+    """ 
+        By Using The Input Handler, You are disabling Skidder's 
+        Built-in Command Handler 
+    """
+    # net.LoadInputEvent(on_input) # Optional
 
 
     # Listen for connections
